@@ -1,0 +1,10 @@
+# 多项目登记表。
+# 只保存逻辑项目信息；各电脑真实路径保存在本机 local/，不要提交。
+version: 1
+projects:
+  benlink-product:
+    name: 分销商品池成本、二次定价与履约成本项目
+    repo: git@github.com:alfred070985/benlink-product.git
+    repo_status: active
+    default_branch: main
+    entry: START_HERE.md

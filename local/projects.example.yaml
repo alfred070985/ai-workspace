@@ -1,0 +1,7 @@
+# 本机项目路径登记示例。
+# 复制为 projects.local.yaml 后填写本机路径；该文件被 .gitignore 排除。
+projects:
+  benlink-product:
+    root: "~/ai-workspace/projects/benlink-product"
+  # <PROJECT_ID>:
+  #   root: "~/ai-workspace/projects/<PROJECT_ID>"

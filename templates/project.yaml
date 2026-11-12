@@ -1,0 +1,16 @@
+project_id: <PROJECT_ID>
+name: <PROJECT_NAME>
+entry: START_HERE.md
+default_branch: main
+repo: <REPO_URL>
+repo_status: proposed_not_created_or_verified
+project_type: <PROJECT_TYPE>
+required_capabilities: []
+large_files:
+  strategy: <none-or-git-lfs>
+  patterns: []
+data_access:
+  production_access: <none-or-describe-readonly-method>
+scope:
+  allow_project_root_only: true
+  scan_sibling_projects: false

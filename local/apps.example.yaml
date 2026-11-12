@@ -1,0 +1,9 @@
+# 本机应用技能目录登记示例。
+# 复制为 apps.local.yaml 后填写真实路径；该文件被 .gitignore 排除。
+apps:
+  kimiwork:
+    skills_dir: "<Kimi Work 在本机的实际技能目录>"
+  workbuddy:
+    skills_dir: "<WorkBuddy 在本机的实际技能目录>"
+  codex:
+    skills_dir: "<Codex 在本机的实际技能目录>"
