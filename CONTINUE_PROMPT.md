@@ -10,16 +10,18 @@
 续作分支：<BRANCH；不确定时填 auto>
 共享控制仓库：git@github.com:alfred070985/ai-workspace.git
 
+> 续作标准第一步（控制仓库优先）：若本机尚未 clone 控制仓库，先 `git clone git@github.com:alfred070985/ai-workspace.git ~/ai-workspace/control`，读其 README + CONTINUE_PROMPT 搭好框架，再 clone 业务项目。控制仓库定义目录规范与续作协议，必须先就位（见 `MULTI_MACHINE_RULES.md` R10）。
+
 请严格执行以下恢复协议：
 
 1. 工作范围仅限项目 ID 对应的项目根目录，不得遍历父目录、兄弟项目或整盘寻找上下文。
 2. 如果本机已经登记该项目，使用登记路径；否则将项目仓库克隆到当前系统用户目录下的 ai-workspace/projects/<PROJECT_ID>。不要把本机绝对路径提交进仓库。
 3. 如果目录已存在，先核对 Git 远程地址。存在未提交改动、远程地址不符或项目身份不符时，停止并报告；不得 reset --hard、clean、覆盖或擅自暂存改动。
-4. 安全获取远程更新。若续作分支为 auto，先在默认分支读取 .ai/state.md 的 resume_branch；随后切到目标分支并执行等效于 git pull --ff-only 的非破坏性更新。
+4. 安全获取远程更新：拉取采用 **merge**（保留双方改动、非破坏），而非 rebase / force。若续作分支为 auto，先在默认分支读取 .ai/state.md 的 resume_branch，再合并式更新；多机并行改动交付清单等配置文件时按"文件路径"upsert，保留双方真实补登（R5 / R11）。
 5. 项目使用 Git LFS 时，确认 Git LFS 可用并拉取实际大文件；如果只有 LFS 指针而没有实际内容，不得继续数据分析。
 6. 首先只读取 START_HERE.md、AGENTS.md、.ai/project.yaml、.ai/state.md。核对 project_id 必须等于 <PROJECT_ID>，不符就停止。
 7. 运行项目声明的离线验证命令；没有声明时，只做不连接生产服务的基础检查。
-8. 如果声明了外部技能或能力包，不要复制其中的凭证、config.local.yaml 或 .tools/。根据当前应用的实际配置设置环境变量或本机软链接；无法确认路径时只询问这一项，不扫描整盘。
+8. 如果声明了外部技能或能力包，不要复制其中的凭证、config.local.yaml 或 .tools/。根据当前应用的实际配置设置环境变量或本机软链接；无法确认路径时只询问这一项，不扫描整盘。若提示无 GitHub 权限：用 SSH 密钥（新机 `ssh-keygen` 生成公钥加入 GitHub）或 Personal Access Token（GitHub Settings → Developer settings 生成，勾 `repo`）；生产库凭证需手动从旧机安全拷贝，永不进 Git（R9）。
 9. 用不超过六行告诉我：项目、分支、当前 HEAD 提交、已完成、唯一下一步、阻塞。随后按 AGENTS.md 和 .ai/state.md 继续，不要重新规划整个项目。
 10. 线上查询、接口调用或生产数据访问必须遵守项目 AGENTS.md 的限制；登录失败、超时或权限不足时记录真实阻塞并停止，不紧密重试。
 11. 每次暂停或完成阶段前，更新 .ai/state.md 和必要的长期决策，运行真实验证，提交并推送当前分支。未成功推送时必须明确说“尚未同步”。

@@ -9,6 +9,7 @@ REQUIRED = [
     "README.md",
     "registry.yaml",
     "CONTINUE_PROMPT.md",
+    "MULTI_MACHINE_RULES.md",
     "templates/START_HERE.md",
     "templates/AGENTS.md",
     "templates/project.yaml",
@@ -29,6 +30,32 @@ def main():
     for relative in REQUIRED:
         if not (ROOT / relative).is_file():
             errors.append(f"缺少文件：{relative}")
+
+    # README 必须引用范式规则文件（让标准“接线生效”）
+    readme_path = ROOT / "README.md"
+    if readme_path.is_file():
+        readme_text = readme_path.read_text(encoding="utf-8")
+        if "MULTI_MACHINE_RULES" not in readme_text:
+            errors.append("README.md 未引用 MULTI_MACHINE_RULES.md")
+
+    # 框架自身必须可移植：扫描 .py / .yaml（不含 local/ 与 .git）是否含本机绝对路径
+    # 注意：不纳入 UNC 标记 "\\\\"，否则本校验脚本的标记定义行会自我误伤
+    portability_markers = ("/Users/", "C:\\", "D:\\")
+    for suffix in ("*.py", "*.yaml"):
+        for path in ROOT.rglob(suffix):
+            parts = path.relative_to(ROOT).parts
+            if "local" in parts or ".git" in parts:
+                continue
+            # 跳过本校验脚本自身：它必然包含要检查的标记定义
+            if path.name == "validate.py":
+                continue
+            text = path.read_text(encoding="utf-8", errors="ignore")
+            for marker in portability_markers:
+                if marker in text:
+                    errors.append(
+                        f"框架文件包含本机绝对路径：{path.relative_to(ROOT)}（违反 R1）"
+                    )
+                    break
 
     registry_path = ROOT / "registry.yaml"
     if registry_path.is_file():
