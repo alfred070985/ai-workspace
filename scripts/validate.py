@@ -13,6 +13,9 @@ REQUIRED = [
     "thinking/CORE.md",
     "thinking/ACTIVATION.md",
     "thinking/patterns/README.md",
+    "jy/README.md",
+    "jy/TEMPLATE.md",
+    "jy/reviews/README.md",
     "templates/START_HERE.md",
     "templates/AGENTS.md",
     "templates/project.yaml",
@@ -34,13 +37,13 @@ def main():
         if not (ROOT / relative).is_file():
             errors.append(f"缺少文件：{relative}")
 
-    # README 必须引用范式规则与思考协议（让标准“接线生效”）
+    # README 必须引用范式规则、思考协议与建议工作区（让标准“接线生效”）
     readme_path = ROOT / "README.md"
     if readme_path.is_file():
         readme_text = readme_path.read_text(encoding="utf-8")
         if "MULTI_MACHINE_RULES" not in readme_text:
             errors.append("README.md 未引用 MULTI_MACHINE_RULES.md")
-        for reference in ("thinking/CORE.md", "thinking/ACTIVATION.md"):
+        for reference in ("thinking/CORE.md", "thinking/ACTIVATION.md", "jy/README.md"):
             if reference not in readme_text:
                 errors.append(f"README.md 未引用 {reference}")
 
@@ -49,6 +52,10 @@ def main():
         path = ROOT / relative
         if path.is_file() and "thinking/CORE.md" not in path.read_text(encoding="utf-8"):
             errors.append(f"{relative} 未引用 thinking/CORE.md")
+
+    template_path = ROOT / "jy/TEMPLATE.md"
+    if template_path.is_file() and "base_commit" not in template_path.read_text(encoding="utf-8"):
+        errors.append("jy/TEMPLATE.md 未记录 base_commit")
 
     # 框架自身必须可移植：扫描 .py / .yaml（不含 local/ 与 .git）是否含本机绝对路径
     # 注意：不纳入 UNC 标记 "\\\\"，否则本校验脚本的标记定义行会自我误伤
@@ -69,15 +76,16 @@ def main():
                     )
                     break
 
-    # 思考协议必须跨设备可移植，不能记录某台电脑的真实路径
-    thinking_dir = ROOT / "thinking"
-    if thinking_dir.is_dir():
-        for path in thinking_dir.rglob("*.md"):
-            text = path.read_text(encoding="utf-8", errors="ignore")
-            for marker in portability_markers:
-                if marker in text:
-                    errors.append(f"思考协议包含本机绝对路径：{path.relative_to(ROOT)}")
-                    break
+    # 协议与建议必须跨设备可移植，不能记录某台电脑的真实路径
+    for directory_name in ("thinking", "jy"):
+        directory = ROOT / directory_name
+        if directory.is_dir():
+            for path in directory.rglob("*.md"):
+                text = path.read_text(encoding="utf-8", errors="ignore")
+                for marker in portability_markers:
+                    if marker in text:
+                        errors.append(f"{directory_name} 文档包含本机绝对路径：{path.relative_to(ROOT)}")
+                        break
 
     registry_path = ROOT / "registry.yaml"
     if registry_path.is_file():
@@ -104,7 +112,7 @@ def main():
         for error in errors:
             print(f"- {error}")
         return 1
-    print("ai-workspace 校验通过：必要文件、思考协议入口、项目 ID 和远程登记规范完整。")
+    print("ai-workspace 校验通过：必要文件、思考协议、建议工作区、项目 ID 和远程登记规范完整。")
     return 0
 
 
