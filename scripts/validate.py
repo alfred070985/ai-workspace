@@ -10,6 +10,9 @@ REQUIRED = [
     "registry.yaml",
     "CONTINUE_PROMPT.md",
     "MULTI_MACHINE_RULES.md",
+    "thinking/CORE.md",
+    "thinking/ACTIVATION.md",
+    "thinking/patterns/README.md",
     "templates/START_HERE.md",
     "templates/AGENTS.md",
     "templates/project.yaml",
@@ -31,12 +34,21 @@ def main():
         if not (ROOT / relative).is_file():
             errors.append(f"缺少文件：{relative}")
 
-    # README 必须引用范式规则文件（让标准“接线生效”）
+    # README 必须引用范式规则与思考协议（让标准“接线生效”）
     readme_path = ROOT / "README.md"
     if readme_path.is_file():
         readme_text = readme_path.read_text(encoding="utf-8")
         if "MULTI_MACHINE_RULES" not in readme_text:
             errors.append("README.md 未引用 MULTI_MACHINE_RULES.md")
+        for reference in ("thinking/CORE.md", "thinking/ACTIVATION.md"):
+            if reference not in readme_text:
+                errors.append(f"README.md 未引用 {reference}")
+
+    # 通用续作与模板必须加载同一份思考协议
+    for relative in ("CONTINUE_PROMPT.md", "templates/PROJECT_CONTINUE_PROMPT.md"):
+        path = ROOT / relative
+        if path.is_file() and "thinking/CORE.md" not in path.read_text(encoding="utf-8"):
+            errors.append(f"{relative} 未引用 thinking/CORE.md")
 
     # 框架自身必须可移植：扫描 .py / .yaml（不含 local/ 与 .git）是否含本机绝对路径
     # 注意：不纳入 UNC 标记 "\\\\"，否则本校验脚本的标记定义行会自我误伤
@@ -55,6 +67,16 @@ def main():
                     errors.append(
                         f"框架文件包含本机绝对路径：{path.relative_to(ROOT)}（违反 R1）"
                     )
+                    break
+
+    # 思考协议必须跨设备可移植，不能记录某台电脑的真实路径
+    thinking_dir = ROOT / "thinking"
+    if thinking_dir.is_dir():
+        for path in thinking_dir.rglob("*.md"):
+            text = path.read_text(encoding="utf-8", errors="ignore")
+            for marker in portability_markers:
+                if marker in text:
+                    errors.append(f"思考协议包含本机绝对路径：{path.relative_to(ROOT)}")
                     break
 
     registry_path = ROOT / "registry.yaml"
@@ -82,7 +104,7 @@ def main():
         for error in errors:
             print(f"- {error}")
         return 1
-    print("ai-workspace 校验通过：必要文件、项目 ID 和远程登记规范完整。")
+    print("ai-workspace 校验通过：必要文件、思考协议入口、项目 ID 和远程登记规范完整。")
     return 0
 
 
